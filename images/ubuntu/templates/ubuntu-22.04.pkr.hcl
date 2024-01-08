@@ -134,6 +134,86 @@ variable "vm_size" {
   default = "Standard_D4s_v4"
 }
 
+variable "sources" {
+  type    = list(string)
+  default = ["source.azure-arm.build_image"]
+}
+
+variable "aws_ami_name" {
+  type    = string
+  default = "github-runner"
+}
+
+variable "aws_ami_regions" {
+  type    = list(string)
+  default = ["eu-west-1"]
+}
+
+variable "aws_instance_type" {
+  type    = string
+  default = "m5.large"
+}
+
+variable "aws_run_tags" {
+  type    = map(string)
+  default = {}
+}
+
+variable "aws_tags" {
+  type    = map(string)
+  default = {}
+}
+
+variable "aws_force_deregister" {
+  type    = bool
+  default = false
+}
+
+variable "aws_force_delete_snapshot" {
+  type    = bool
+  default = false
+}
+
+variable "aws_region" {
+  type    = string
+  default = "${env("AWS_REGION")}"
+}
+
+variable "aws_vpc_id" {
+  type    = string
+  default = "${env("AWS_VPC_ID")}"
+}
+
+variable "aws_subnet_id" {
+  type    = string
+  default = "${env("AWS_SUBNET_ID")}"
+}
+
+variable "aws_volume_size" {
+  type    = number
+  default = 150
+}
+
+variable "aws_run_volume_tags" {
+  type = map(string)
+  default = {}
+}
+
+variable "aws_associate_public_ip_address" {
+  type    = bool
+  default = false
+}
+
+variable "aws_ssh_username" {
+  type    = string
+  default = "ubuntu"
+}
+
+variable "aws_deprecate_after" {
+  type    = string
+  default = "4380h" # 4380 hours = 6 months
+}
+
 source "azure-arm" "build_image" {
   allowed_inbound_ip_addresses           = "${var.allowed_inbound_ip_addresses}"
   build_resource_group_name              = "${var.build_resource_group_name}"
@@ -166,8 +246,55 @@ source "azure-arm" "build_image" {
   }
 }
 
+source "amazon-ebs" "ubuntu-base-2204" {
+  ami_name    = "${var.aws_ami_name}"
+  ami_regions = var.aws_ami_regions    # all known AWS regions
+
+  deprecate_at = timeadd(timestamp(), "${var.aws_deprecate_after}")
+
+  run_tags = var.aws_run_tags
+  tags     = var.aws_tags
+
+  instance_type = "${var.aws_instance_type}"
+
+  force_deregister      = var.aws_force_deregister
+  force_delete_snapshot = var.aws_force_delete_snapshot
+
+  region    = "${var.aws_region}"
+  vpc_id    = "${var.aws_vpc_id}"
+  subnet_id = "${var.aws_subnet_id}"
+
+  launch_block_device_mappings {
+    device_name = "/dev/sda1"
+    volume_size = var.aws_volume_size
+    delete_on_termination = true
+  }
+
+  run_volume_tags = var.aws_run_volume_tags
+
+  associate_public_ip_address = var.aws_associate_public_ip_address
+  ssh_username                = "ubuntu"
+
+  metadata_options {
+    instance_metadata_tags = "enabled"
+  }
+
+  source_ami_filter {
+    # See https://ubuntu.com/server/docs/cloud-images/amazon-ec2
+    filters = {
+      virtualization-type = "hvm"
+      name                = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
+      root-device-type    = "ebs"
+      architecture        = "x86_64"
+    }
+
+    owners      = ["099720109477"] # this is Canonical (official)
+    most_recent = true
+  }
+}
+
 build {
-  sources = ["source.azure-arm.build_image"]
+  sources = var.sources
 
   provisioner "shell" {
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
