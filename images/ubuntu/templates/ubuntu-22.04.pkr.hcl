@@ -246,7 +246,7 @@ variable "aws_volume_size" {
 }
 
 variable "aws_run_volume_tags" {
-  type = map(string)
+  type    = map(string)
   default = {}
 }
 
@@ -309,7 +309,7 @@ source "azure-arm" "build_image" {
 
 source "amazon-ebs" "ubuntu-base-2204" {
   ami_name    = "${var.aws_ami_name}"
-  ami_regions = var.aws_ami_regions    # all known AWS regions
+  ami_regions = var.aws_ami_regions # all known AWS regions
 
   deprecate_at = timeadd(timestamp(), "${var.aws_deprecate_after}")
 
@@ -326,8 +326,8 @@ source "amazon-ebs" "ubuntu-base-2204" {
   subnet_id = "${var.aws_subnet_id}"
 
   launch_block_device_mappings {
-    device_name = "/dev/sda1"
-    volume_size = var.aws_volume_size
+    device_name           = "/dev/sda1"
+    volume_size           = var.aws_volume_size
     delete_on_termination = true
   }
 
