@@ -4,6 +4,10 @@ packer {
       source  = "github.com/hashicorp/azure"
       version = "1.4.5"
     }
+    amazon = {
+      source = "github.com/hashicorp/amazon"
+      version = "1.3.2"
+    }
   }
 }
 
