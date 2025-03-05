@@ -101,7 +101,7 @@ Function GenerateResourcesAndImage {
         .PARAMETER AzureTenantId
             The Azure tenant id to use to authenticate with Azure. If not specified, the current user's credentials will be used.
         .PARAMETER RestrictToAgentIpAddress
-            If set, access to the VM used by packer to generate the image is restricted to the public IP address this script is run from. 
+            If set, access to the VM used by packer to generate the image is restricted to the public IP address this script is run from.
             This parameter cannot be used in combination with the virtual_network_name packer parameter.
         .PARAMETER Force
             Delete the resource group if it exists without user confirmation.
@@ -226,6 +226,13 @@ Function GenerateResourcesAndImage {
 
     if ($LastExitCode -ne 0) {
         throw "Packer plugins download failed."
+    }
+
+    Write-Host "Downloading amazon packer plugin..."
+    & $PackerBinary plugins install github.com/hashicorp/amazon 1.3.2
+
+    if ($LastExitCode -ne 0) {
+        throw "Packer amazon plugin download failed."
     }
 
     Write-Host "Validating packer template..."
