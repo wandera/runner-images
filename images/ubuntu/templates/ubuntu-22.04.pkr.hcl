@@ -443,7 +443,6 @@ build {
       "${path.root}/../scripts/build/install-kubernetes-tools.sh",
       "${path.root}/../scripts/build/install-oc-cli.sh",
       "${path.root}/../scripts/build/install-leiningen.sh",
-      "${path.root}/../scripts/build/install-miniconda.sh",
       "${path.root}/../scripts/build/install-mono.sh",
       "${path.root}/../scripts/build/install-kotlin.sh",
       "${path.root}/../scripts/build/install-mysql.sh",
