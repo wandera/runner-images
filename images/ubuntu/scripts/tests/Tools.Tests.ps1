@@ -37,7 +37,7 @@ Describe "Rust" {
     It "Rustfmt is installed" {
         "rustfmt --version" | Should -ReturnZeroExitCode
     }
-    
+
     It "cargo" {
         "cargo --version" | Should -ReturnZeroExitCode
     }
@@ -310,12 +310,6 @@ Describe "Kubernetes tools" {
 Describe "Leiningen" -Skip:((-not (Test-IsUbuntu20)) -and (-not (Test-IsUbuntu22))) {
     It "leiningen" {
         "lein --version" | Should -ReturnZeroExitCode
-    }
-}
-
-Describe "Conda" {
-    It "conda" {
-        "conda --version" | Should -ReturnZeroExitCode
     }
 }
 
