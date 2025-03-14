@@ -280,6 +280,7 @@ source "amazon-ebs" "ubuntu-base-2404" {
   launch_block_device_mappings {
     device_name = "/dev/sda1"
     volume_size = var.aws_volume_size
+    volume_type = "gp3"
     delete_on_termination = true
   }
 
