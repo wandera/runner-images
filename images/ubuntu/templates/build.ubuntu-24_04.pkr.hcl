@@ -1,6 +1,378 @@
+packer {
+  required_plugins {
+    azure = {
+      source  = "github.com/hashicorp/azure"
+      version = "2.2.1"
+    }
+    amazon = {
+      source = "github.com/hashicorp/amazon"
+      version = "1.3.2"
+    }
+  }
+}
+
+locals {
+  managed_image_name = var.managed_image_name != "" ? var.managed_image_name : "packer-${var.image_os}-${var.image_version}"
+}
+
+variable "allowed_inbound_ip_addresses" {
+  type    = list(string)
+  default = []
+}
+
+variable "azure_tags" {
+  type    = map(string)
+  default = {}
+}
+
+variable "build_resource_group_name" {
+  type    = string
+  default = "${env("BUILD_RG_NAME")}"
+}
+
+variable "client_cert_path" {
+  type    = string
+  default = "${env("ARM_CLIENT_CERT_PATH")}"
+}
+
+variable "client_id" {
+  type    = string
+  default = "${env("ARM_CLIENT_ID")}"
+}
+
+variable "client_secret" {
+  type      = string
+  default   = "${env("ARM_CLIENT_SECRET")}"
+  sensitive = true
+}
+
+variable "dockerhub_login" {
+  type    = string
+  default = "${env("DOCKERHUB_LOGIN")}"
+}
+
+variable "dockerhub_password" {
+  type    = string
+  default = "${env("DOCKERHUB_PASSWORD")}"
+}
+
+variable "helper_script_folder" {
+  type    = string
+  default = "/imagegeneration/helpers"
+}
+
+variable "image_folder" {
+  type    = string
+  default = "/imagegeneration"
+}
+
+variable "image_os" {
+  type    = string
+  default = "ubuntu24"
+}
+
+variable "image_version" {
+  type    = string
+  default = "dev"
+}
+
+variable "imagedata_file" {
+  type    = string
+  default = "/imagegeneration/imagedata.json"
+}
+
+variable "installer_script_folder" {
+  type    = string
+  default = "/imagegeneration/installers"
+}
+
+variable "install_password" {
+  type      = string
+  default   = ""
+  sensitive = true
+}
+
+variable "location" {
+  type    = string
+  default = ""
+}
+
+variable "managed_image_name" {
+  type    = string
+  default = ""
+}
+
+variable "managed_image_resource_group_name" {
+  type    = string
+  default = "${env("ARM_RESOURCE_GROUP")}"
+}
+
+variable "private_virtual_network_with_public_ip" {
+  type    = bool
+  default = false
+}
+
+variable "subscription_id" {
+  type    = string
+  default = "${env("ARM_SUBSCRIPTION_ID")}"
+}
+
+variable "temp_resource_group_name" {
+  type    = string
+  default = "${env("TEMP_RESOURCE_GROUP_NAME")}"
+}
+
+variable "tenant_id" {
+  type    = string
+  default = "${env("ARM_TENANT_ID")}"
+}
+
+variable "virtual_network_name" {
+  type    = string
+  default = "${env("VNET_NAME")}"
+}
+
+variable "virtual_network_resource_group_name" {
+  type    = string
+  default = "${env("VNET_RESOURCE_GROUP")}"
+}
+
+variable "virtual_network_subnet_name" {
+  type    = string
+  default = "${env("VNET_SUBNET")}"
+}
+
+variable "vm_size" {
+  type    = string
+  default = "Standard_D4s_v4"
+}
+
+variable "image_offer" {
+  type    = string
+  default = "ubuntu-24_04-lts"
+}
+
+variable "image_publisher" {
+  type    = string
+  default = "canonical"
+}
+
+variable "image_sku" {
+  type    = string
+  default = "server-gen1"
+}
+
+variable "gallery_name" {
+  type    = string
+  default = "${env("GALLERY_NAME")}"
+}
+
+variable "gallery_resource_group_name" {
+  type    = string
+  default = "${env("GALLERY_RG_NAME")}"
+}
+
+variable "gallery_image_name" {
+  type    = string
+  default = "${env("GALLERY_IMAGE_NAME")}"
+}
+
+variable "gallery_image_version" {
+  type    = string
+  default = "${env("GALLERY_IMAGE_VERSION")}"
+}
+
+variable "gallery_storage_account_type" {
+  type    = string
+  default = "${env("GALLERY_STORAGE_ACCOUNT_TYPE")}"
+}
+
+variable "use_azure_cli_auth" {
+  type    = bool
+  default = false
+}
+
+variable "os_disk_size_gb" {
+  type    = number
+  default = 75
+}
+
+variable "image_os_type" {
+  type    = string
+  default = "Linux"
+}
+
+variable "sources" {
+  type    = list(string)
+  default = ["source.azure-arm.build_image"]
+}
+
+variable "aws_ami_name" {
+  type    = string
+  default = "github-runner"
+}
+
+variable "aws_ami_regions" {
+  type    = list(string)
+  default = ["eu-west-1"]
+}
+
+variable "aws_instance_type" {
+  type    = string
+  default = "m5.large"
+}
+
+variable "aws_run_tags" {
+  type    = map(string)
+  default = {}
+}
+
+variable "aws_tags" {
+  type    = map(string)
+  default = {}
+}
+
+variable "aws_force_deregister" {
+  type    = bool
+  default = false
+}
+
+variable "aws_force_delete_snapshot" {
+  type    = bool
+  default = false
+}
+
+variable "aws_region" {
+  type    = string
+  default = "${env("AWS_REGION")}"
+}
+
+variable "aws_vpc_id" {
+  type    = string
+  default = "${env("AWS_VPC_ID")}"
+}
+
+variable "aws_subnet_id" {
+  type    = string
+  default = "${env("AWS_SUBNET_ID")}"
+}
+
+variable "aws_volume_size" {
+  type    = number
+  default = 150
+}
+
+variable "aws_run_volume_tags" {
+  type    = map(string)
+  default = {}
+}
+
+variable "aws_associate_public_ip_address" {
+  type    = bool
+  default = false
+}
+
+variable "aws_ssh_username" {
+  type    = string
+  default = "ubuntu"
+}
+
+variable "aws_deprecate_after" {
+  type    = string
+  default = "4380h" # 4380 hours = 6 months
+}
+
+source "azure-arm" "build_image" {
+  allowed_inbound_ip_addresses           = "${var.allowed_inbound_ip_addresses}"
+  build_resource_group_name              = "${var.build_resource_group_name}"
+  client_cert_path                       = "${var.client_cert_path}"
+  client_id                              = "${var.client_id}"
+  client_secret                          = "${var.client_secret}"
+  use_azure_cli_auth                     = var.use_azure_cli_auth
+  image_offer                            = "${var.image_offer}"
+  image_publisher                        = "${var.image_publisher}"
+  image_sku                              = "${var.image_sku}"
+  location                               = "${var.location}"
+  managed_image_name                     = "${var.managed_image_name}"
+  managed_image_resource_group_name      = "${var.managed_image_resource_group_name}"
+  os_disk_size_gb                        = var.os_disk_size_gb
+  os_type                                = var.image_os_type
+  private_virtual_network_with_public_ip = "${var.private_virtual_network_with_public_ip}"
+  subscription_id                        = "${var.subscription_id}"
+  temp_resource_group_name               = "${var.temp_resource_group_name}"
+  tenant_id                              = "${var.tenant_id}"
+  virtual_network_name                   = "${var.virtual_network_name}"
+  virtual_network_resource_group_name    = "${var.virtual_network_resource_group_name}"
+  virtual_network_subnet_name            = "${var.virtual_network_subnet_name}"
+  vm_size                                = "${var.vm_size}"
+
+  shared_image_gallery_destination {
+    subscription                         = var.subscription_id
+    gallery_name                         = var.gallery_name
+    resource_group                       = var.gallery_resource_group_name
+    image_name                           = var.gallery_image_name
+    image_version                        = var.gallery_image_version
+    storage_account_type                 = var.gallery_storage_account_type
+  }
+
+  dynamic "azure_tag" {
+    for_each = var.azure_tags
+    content {
+      name = azure_tag.key
+      value = azure_tag.value
+    }
+  }
+}
+
+source "amazon-ebs" "ubuntu-base-2404" {
+  ami_name    = "${var.aws_ami_name}"
+  ami_regions = var.aws_ami_regions    # all known AWS regions
+
+  deprecate_at = timeadd(timestamp(), "${var.aws_deprecate_after}")
+
+  run_tags = var.aws_run_tags
+  tags     = var.aws_tags
+
+  instance_type = "${var.aws_instance_type}"
+
+  force_deregister      = var.aws_force_deregister
+  force_delete_snapshot = var.aws_force_delete_snapshot
+
+  region    = "${var.aws_region}"
+  vpc_id    = "${var.aws_vpc_id}"
+  subnet_id = "${var.aws_subnet_id}"
+
+  launch_block_device_mappings {
+    device_name = "/dev/sda1"
+    volume_size = var.aws_volume_size
+    delete_on_termination = true
+  }
+
+  run_volume_tags = var.aws_run_volume_tags
+
+  associate_public_ip_address = var.aws_associate_public_ip_address
+  ssh_username                = "ubuntu"
+
+  metadata_options {
+    instance_metadata_tags = "enabled"
+  }
+
+  source_ami_filter {
+    # See https://ubuntu.com/server/docs/cloud-images/amazon-ec2
+    filters = {
+      virtualization-type = "hvm"
+      name                = "ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"
+      root-device-type    = "ebs"
+      architecture        = "x86_64"
+    }
+
+    owners      = ["099720109477"] # this is Canonical (official)
+    most_recent = true
+  }
+}
+
 build {
-  sources = ["source.azure-arm.image"]
-  name = "ubuntu-24_04"
+  sources = var.sources
 
   provisioner "shell" {
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
@@ -77,6 +449,14 @@ build {
   }
 
   provisioner "shell" {
+    only             = ["azure-arm.build_image"]
+    environment_vars = ["IMAGE_VERSION=${var.image_version}", "IMAGE_OS=${var.image_os}", "HELPER_SCRIPTS=${var.helper_script_folder}"]
+    execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    scripts          = ["${path.root}/../scripts/build/configure-environment-azure-arm.sh"]
+  }
+
+
+  provisioner "shell" {
     environment_vars = ["DEBIAN_FRONTEND=noninteractive", "HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}"]
     execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     scripts          = ["${path.root}/../scripts/build/install-apt-vital.sh"]
@@ -125,7 +505,6 @@ provisioner "shell" {
       "${path.root}/../scripts/build/install-haskell.sh",
       "${path.root}/../scripts/build/install-java-tools.sh",
       "${path.root}/../scripts/build/install-kubernetes-tools.sh",
-      "${path.root}/../scripts/build/install-miniconda.sh",
       "${path.root}/../scripts/build/install-kotlin.sh",
       "${path.root}/../scripts/build/install-mysql.sh",
       "${path.root}/../scripts/build/install-nginx.sh",
@@ -218,12 +597,7 @@ provisioner "shell" {
   }
 
   provisioner "shell" {
-    environment_vars = ["HELPER_SCRIPTS=${var.helper_script_folder}"]
-    execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
-    scripts          = ["${path.root}/../scripts/build/post-build-validation.sh"]
-  }
-
-  provisioner "shell" {
+    only            = ["azure-arm.build_image"]
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     inline          = ["sleep 30", "/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"]
   }
