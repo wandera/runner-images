@@ -66,9 +66,6 @@ $packageManagement = $installedSoftware.AddHeader("Package Management")
 $packageManagement.AddToolVersion("cpan", $(Get-CpanVersion))
 $packageManagement.AddToolVersion("Helm", $(Get-HelmVersion))
 $packageManagement.AddToolVersion("Homebrew", $(Get-HomebrewVersion))
-if ((Test-IsUbuntu22-X64) -or (Test-IsUbuntu24-X64)) {
-    $packageManagement.AddToolVersion("Miniconda", $(Get-MinicondaVersion))
-}
 $packageManagement.AddToolVersion("Npm", $(Get-NpmVersion))
 if (Test-IsUbuntu22) {
     $packageManagement.AddToolVersion("NuGet", $(Get-NuGetVersion))
