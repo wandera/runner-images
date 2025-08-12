@@ -47,7 +47,11 @@ Describe "Apt acquire configuration" {
         (Get-CommandResult "apt-config dump APT::Acquire::Retries").Output | Should -BeNullOrEmpty
     }
 
-    It "Apt sources resolve through the mirror list" -Skip:$usesPortsArchive {
+    # [jamf] Skipped on AWS EC2 images. configure-apt-sources.sh builds the mirror list by
+    # sed-replacing the Azure archive URL (azure.archive.ubuntu.com) with mirror+file:, which only
+    # matches on an Azure base image. Our EC2 base has no such URL, so the rewrite is a no-op and the
+    # image stays on its default sources — this assertion does not apply. See JSC-72246.
+    It "Apt sources resolve through the mirror list" -Skip:$true {
         $sourcesFile = if (Test-IsUbuntu22) { "/etc/apt/sources.list" } else { "/etc/apt/sources.list.d/ubuntu.sources" }
         Get-Content $sourcesFile -Raw | Should -Match ([regex]::Escape("mirror+file:/etc/apt/apt-mirrors.txt"))
     }
