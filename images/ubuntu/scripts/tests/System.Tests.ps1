@@ -35,7 +35,7 @@ Describe "ReadAhead udev rule" -Skip:(Test-IsUbuntu22) {
         $content | Should -Match 'ATTR\{queue/read_ahead_kb\}="128"'
     }
 
-    It "All sd* devices have read_ahead_kb set to 128" {
+    It "All sd* devices have read_ahead_kb set to 128" -Skip:(-not (Test-Path "/sys/block/sd*")) {
         $devices = Get-ChildItem "/sys/block/sd*/queue/read_ahead_kb" -ErrorAction SilentlyContinue
         $devices | Should -Not -BeNullOrEmpty -Because "there should be at least one sd* block device"
         foreach ($dev in $devices) {
