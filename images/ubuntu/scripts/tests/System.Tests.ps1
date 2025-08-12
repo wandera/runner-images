@@ -10,7 +10,11 @@ Describe "Disk free space" -Skip:(-not [String]::IsNullOrEmpty($env:AGENT_NAME) 
     }
 }
 
-Describe "Azure resource disk mount timeout" {
+# [jamf] Skipped on AWS EC2 images. configure-environment.sh creates this cloud-init drop-in to cap
+# the Azure resource-disk mount wait, but our EC2 build removes that Azure-specific block (there is no
+# Azure resource disk on EC2), so the file is intentionally absent and this assertion does not apply.
+# See JSC-72246.
+Describe "Azure resource disk mount timeout" -Skip:$true {
     It "cloud-init drop-in exists" {
         "/etc/cloud/cloud.cfg.d/99-azure-resource-disk-timeout.cfg" | Should -Exist
     }
