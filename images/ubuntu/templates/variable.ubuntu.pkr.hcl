@@ -1,3 +1,73 @@
+// AWS support related variables
+variable "sources" {
+  type    = list(string)
+  default = ["source.azure-arm.build_image"]
+}
+variable "aws_ami_name" {
+  type    = string
+  default = "github-runner"
+}
+variable "aws_ami_filter_name" {
+  type    = string
+  default = "ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"
+}
+variable "aws_ami_regions" {
+  type    = list(string)
+  default = ["eu-west-1"]
+}
+variable "aws_instance_type" {
+  type    = string
+  default = "m5.large"
+}
+variable "aws_run_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "aws_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "aws_force_deregister" {
+  type    = bool
+  default = false
+}
+variable "aws_force_delete_snapshot" {
+  type    = bool
+  default = false
+}
+variable "aws_region" {
+  type    = string
+  default = "${env("AWS_REGION")}"
+}
+variable "aws_vpc_id" {
+  type    = string
+  default = "${env("AWS_VPC_ID")}"
+}
+variable "aws_subnet_id" {
+  type    = string
+  default = "${env("AWS_SUBNET_ID")}"
+}
+variable "aws_volume_size" {
+  type    = number
+  default = 150
+}
+variable "aws_run_volume_tags" {
+  type    = map(string)
+  default = {}
+}
+variable "aws_associate_public_ip_address" {
+  type    = bool
+  default = false
+}
+variable "aws_ssh_username" {
+  type    = string
+  default = "ubuntu"
+}
+variable "aws_deprecate_after" {
+  type    = string
+  default = "4380h" # 4380 hours = 6 months
+}
+
 // Authentication related variables
 variable "client_cert_path" {
   type    = string
