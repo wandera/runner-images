@@ -15,4 +15,6 @@ locals {
   }
 
   image_properties = local.image_properties_map[var.image_os]
+
+  managed_image_name = var.managed_image_name != "" ? var.managed_image_name : "packer-${var.image_os}-${var.image_version}"
 }

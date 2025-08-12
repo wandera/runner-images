@@ -1,6 +1,6 @@
 build {
-  sources = ["source.azure-arm.image"]
   name = "ubuntu-22_04"
+  sources = var.sources
 
   provisioner "shell" {
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
@@ -77,6 +77,13 @@ build {
   }
 
   provisioner "shell" {
+    only             = ["azure-arm.image"]
+    environment_vars = ["IMAGE_VERSION=${var.image_version}", "IMAGE_OS=${var.image_os}", "HELPER_SCRIPTS=${var.helper_script_folder}"]
+    execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
+    scripts          = ["${path.root}/../scripts/build/configure-environment-azure-arm.sh"]
+  }
+
+  provisioner "shell" {
     environment_vars = ["DEBIAN_FRONTEND=noninteractive", "HELPER_SCRIPTS=${var.helper_script_folder}", "INSTALLER_SCRIPT_FOLDER=${var.installer_script_folder}"]
     execute_command  = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     scripts          = ["${path.root}/../scripts/build/install-apt-vital.sh"]
@@ -129,7 +136,6 @@ build {
       "${path.root}/../scripts/build/install-kubernetes-tools.sh",
       "${path.root}/../scripts/build/install-oc-cli.sh",
       "${path.root}/../scripts/build/install-leiningen.sh",
-      "${path.root}/../scripts/build/install-miniconda.sh",
       "${path.root}/../scripts/build/install-mono.sh",
       "${path.root}/../scripts/build/install-kotlin.sh",
       "${path.root}/../scripts/build/install-mysql.sh",
@@ -245,6 +251,7 @@ build {
   }
 
   provisioner "shell" {
+    only            = ["azure-arm.image"]
     execute_command = "sudo sh -c '{{ .Vars }} {{ .Path }}'"
     inline          = ["sleep 30", "/usr/sbin/waagent -force -deprovision+user && export HISTSIZE=0 && sync"]
   }
