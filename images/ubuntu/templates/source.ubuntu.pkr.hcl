@@ -47,3 +47,50 @@ source "azure-arm" "image" {
     }
   }
 }
+
+source "amazon-ebs" "ubuntu" {
+  ami_name    = "${var.aws_ami_name}"
+  ami_regions = var.aws_ami_regions # all known AWS regions
+
+  deprecate_at = timeadd(timestamp(), "${var.aws_deprecate_after}")
+
+  run_tags = var.aws_run_tags
+  tags     = var.aws_tags
+
+  instance_type = "${var.aws_instance_type}"
+
+  force_deregister      = var.aws_force_deregister
+  force_delete_snapshot = var.aws_force_delete_snapshot
+
+  region    = "${var.aws_region}"
+  vpc_id    = "${var.aws_vpc_id}"
+  subnet_id = "${var.aws_subnet_id}"
+
+  launch_block_device_mappings {
+    device_name           = "/dev/sda1"
+    volume_size           = var.aws_volume_size
+    delete_on_termination = true
+  }
+
+  run_volume_tags = var.aws_run_volume_tags
+
+  associate_public_ip_address = var.aws_associate_public_ip_address
+  ssh_username                = "ubuntu"
+
+  metadata_options {
+    instance_metadata_tags = "enabled"
+  }
+
+  source_ami_filter {
+    # See https://ubuntu.com/server/docs/cloud-images/amazon-ec2
+    filters = {
+      virtualization-type = "hvm"
+      name                = var.aws_ami_filter_name
+      root-device-type    = "ebs"
+      architecture        = "x86_64"
+    }
+
+    owners      = ["099720109477"] # this is Canonical (official)
+    most_recent = true
+  }
+}
