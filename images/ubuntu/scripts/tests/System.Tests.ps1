@@ -10,6 +10,21 @@ Describe "Disk free space" -Skip:(-not [String]::IsNullOrEmpty($env:AGENT_NAME) 
     }
 }
 
+# [jamf] Skipped on AWS EC2 images. configure-environment.sh creates this cloud-init drop-in to cap
+# the Azure resource-disk mount wait, but our EC2 build removes that Azure-specific block (there is no
+# Azure resource disk on EC2), so the file is intentionally absent and this assertion does not apply.
+# See JSC-72246.
+Describe "Azure resource disk mount timeout" -Skip:$true {
+    It "cloud-init drop-in exists" {
+        "/etc/cloud/cloud.cfg.d/99-azure-resource-disk-timeout.cfg" | Should -Exist
+    }
+
+    It "caps the resource-disk mount wait so boot is not delayed when the disk is absent" {
+        $content = Get-Content "/etc/cloud/cloud.cfg.d/99-azure-resource-disk-timeout.cfg" -Raw
+        $content | Should -Match 'x-systemd\.device-timeout=1s'
+    }
+}
+
 Describe "fwupd removed" {
     It "Is not present on box" {
         $systemctlOutput = & systemctl list-units fwupd-refresh.timer --no-legend
@@ -43,5 +58,30 @@ Describe "ReadAhead udev rule" -Skip:(Test-IsUbuntu22) {
             $value = (Get-Content $dev.FullName).Trim()
             $value | Should -Be "128" -Because "read_ahead_kb for $($dev.FullName) should be 128 to prevent I/O thrashing"
         }
+    }
+}
+
+Describe "Root filesystem performance options" {
+    It "GRUB drop-in sets the root filesystem mount options" {
+        $content = Get-Content "/etc/default/grub.d/99-runner-performance.cfg" -Raw
+        $content | Should -Match "rootflags=nobarrier,data=writeback,journal_async_commit,commit=30"
+    }
+
+    It "Kernel command line contains the root filesystem mount options" {
+        $cmdline = & cat /proc/cmdline
+        $cmdline | Should -Match "rootflags=nobarrier,data=writeback,journal_async_commit,commit=30"
+    }
+
+    It "Root filesystem is mounted with the relaxed durability options" {
+        $mountOptions = (findmnt --noheadings --first-only --output OPTIONS --target /) -split ","
+        $mountOptions | Should -Contain "data=writeback"
+        $mountOptions | Should -Contain "commit=30"
+    }
+}
+
+Describe "Dpkg options" {
+    It "Package unpacking is configured with --force-unsafe-io" {
+        $dpkgOptions = (apt-config dump "Dpkg::Options") -join "`n"
+        $dpkgOptions | Should -Match "--force-unsafe-io"
     }
 }
